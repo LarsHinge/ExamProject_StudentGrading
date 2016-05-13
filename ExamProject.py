@@ -29,7 +29,7 @@ def findGradeMatrix(FileName):
 
 def findStudentMatrix(CSV):
     studentMatrix = CSV.iloc[:,[0,1]]
-    return(studentMatrix)
+    return(studentMatrix)    
 
 def main():
     FileName = (input(("Enter name of comma-separated-values file in .CSV (don't write '.csv') format containing the sudentIDs, names and grades of your students:" ))+'.csv')
