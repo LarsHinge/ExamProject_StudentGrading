@@ -1,0 +1,210 @@
+import numpy as np
+import pandas as pd
+import csv
+import matplotlib.pyplot as plt
+
+#your Code here
+def gradeErrors():
+
+    return()
+
+   
+    
+# round a vector of grade to 7-scale grade
+def roundGrade(grades):
+	# 7-scale grade
+	scale = [-3, 0, 2, 4, 7, 10, 12]
+	
+	for i in range(len(grades)):
+		minD = 100
+		gradeToScale = -1
+		
+		# find the closest grade in 7-scale
+		for j in range(len(scale)):
+			if (abs(grades[i] - scale[j]) <= minD):
+				minD = grades[i] - scale[j]
+				gradeToScale = scale[j]
+		grades[i] = gradeToScale
+
+	gradesRounded = grades
+	return gradesRounded
+    
+def computeFinalGrades(grades):
+	# intialization
+	nStudent = len(grades[:, 0])
+	nAssignment = len(grades[0, :])
+
+	# case number of nAssignment = 1
+	if (nAssignment == 1):
+		gradesFinal = grades[:, 0].T
+
+	else:
+		gradesFinal = []
+
+		# find mean of grades of each student
+		for i in range(nStudent):
+			# print (grades[i, :])
+			if (-3 in grades[i, :]):
+				meanGrade = -3
+			else: 
+				meanGrade = np.mean(grades[i, :])
+				
+			gradesFinal.append(meanGrade)
+
+		# print("Mean grade before round", gradesFinal)
+		# round grade using roundGrade.py
+		gradesFinal = roundGrade(gradesFinal)	
+	return gradesFinal
+ 
+ 
+ 
+# GRADEPLOT Generates plots of student grades
+    #
+    # Usage: dataPlot(data)
+    #
+    # Input  FinalGrades   An array of the final grades the students will get. 
+    # Can be calculated using computeFinalGrade 
+    #
+    # input  GradeMatrix  A NxM matrix where M is the number of assignments and N the numebr of students 
+    # Author: Lars Hinge, s154349 2016      
+
+
+def gradePlot(FinalGrades,GradeMatrix):
+    CSV = GradeMatrix
+    #make the barplot
+    GradeAppearance = np.zeros(7) #Count how many times each grade was given
+    for i in range(len(FinalGrades)):
+        if (FinalGrades[i] == -3): #Count the -3's
+            GradeAppearance[0]+=1
+        if (FinalGrades[i] == 0): #Count the 00's
+            GradeAppearance[1]+=1 
+        if (FinalGrades[i] == 2): #etc.
+            GradeAppearance[2]+=1
+        if (FinalGrades[i] == 4):
+            GradeAppearance[3]+=1        
+        if (FinalGrades[i] == 7):
+            GradeAppearance[4]+=1  
+        if (FinalGrades[i] == 10):
+            GradeAppearance[5]+=1
+        if (FinalGrades[i] == 12):
+            GradeAppearance[6]+=1
+    plt.bar(range(7), GradeAppearance)
+    # Set title and axis labels
+    plt.title("Grade frequency")
+    plt.xlabel("Grades")
+    plt.ylabel("Occurance")
+    # Set tick-labels
+    plt.xticks(np.arange(7)+0.5, np.array(["-3","00","02","4","7","10","12"]))
+    # Show plot
+    plt.show()
+    
+    
+    #make plot 2
+    x = np.array([])
+    for i in range(len(CSV[:,2])):#Create x-values so they fit with y-values
+        x = np.append(x,(np.arange(len(CSV[1,:]))))
+    
+    y = (np.reshape(CSV, -1)) #reshape the gradematrix to be a line. It can now be plottet.
+       
+    for i in range(len(y)):#have the dots not stack
+        y[i]+=np.random.uniform(-0.1,0.1)
+        x[i]+=np.random.uniform(-0.1,0.1)
+        
+    #plot x,y and add label
+    plt.plot(x,y, "ro", label = "Grade the students scored on the assignments")
+    
+    #Calculate the average grade on each assignment  
+    MeanY = np.array([])  
+    for i in range(len(CSV[2,:])):
+        MeanY = np.append(MeanY,(np.mean(CSV[:,i])))
+ 
+    #Draw line for the average grade on each assignment
+    for i in range(len(CSV[2,:])): 
+        plt.plot(np.array([i-0.4,i+0.4]),np.array([MeanY[i],MeanY[i]]),
+                 label = "Average grade on Assignment {:.0f} ".format(round(i+1)))
+       
+        
+    #set labels, tickrate, ticknames, limits and a legen for the whole plot
+    plt.title("Average grades for assignments")
+    plt.yticks(np.array([-3,0,2,4,7,10,12]), np.array(["-3","00","02","4","7","10","12"]))
+    plt.xticks(np.arange(len(CSV[:,1])-2), np.arange(1, len(CSV[:,1])-2))
+    plt.xlabel("Assignments")
+    plt.ylabel("Grades")
+    plt.xlim([-0.2,len(CSV[1,:])-0.8])
+    plt.ylim([-4,13])
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    #show the plot
+    plt.show() 
+    CSV = GradeMatrix
+    return
+    
+    
+def Information(matrix):
+    #find number of assignments
+    NoA = int(len(matrix.iloc[0,:])-2)
+    #find number of students
+    NoS = int(len(matrix.iloc[:,0]))
+    return("Your {:.0f} students had to each hand in {:.0f} assignments".format(round(NoS), round(NoA)))    
+    
+def getInput(FileName):
+    # Import data using input from user and dataLoad funktion
+    CSV = pd.read_csv(FileName)
+    print(CSV)
+    print("---------------------------------------------------------------")
+    print(Information(CSV))
+    print("---------------------------------------------------------------")
+    return(CSV)
+
+
+def findGradeMatrix(FileName):
+    completeCSV = pd.read_csv(FileName)
+    gradeMatrix = np.loadtxt(open(FileName,"rb"),delimiter=",",skiprows=1, usecols=range(2,len(completeCSV.iloc[3,:])))
+    return(gradeMatrix)
+
+def main():
+    FileName = (input(("Enter name of comma-separated-values file in .CSV (don't write '.csv') format containing the IDs, Names and Grades of your students:" ))+'.csv')
+    CSV = getInput(FileName)
+    GradeMatrix = findGradeMatrix(FileName)
+    
+    menu = {} #Main Menu options
+    menu['']=""
+    menu[' ']="Main Menue:"
+    menu['   ']=""
+    menu['1']="Load New Data."
+    menu['2']="Check for data errors."
+    menu['3']="Generate Plot"
+    menu['4']="Display list of grades"
+    menu['5']="Quit."
+    
+    while True: #Sorting and printing mainmenu
+        options=sorted(menu.keys())
+        for entry in options: 
+            print(entry, menu[entry])
+        
+        selection=input("Please Select Number: ") #get menu option from input
+   
+        if selection == '1': #Enter New File
+            FileName = (input(("Enter name of new comma-separated-values file in .CSV (don't write '.csv') format containing the sudentIDs, names and grades of your students:" ))+'.csv')
+            CSV = getInput(FileName)
+            GradeMatrix = findGradeMatrix(FileName)
+        elif selection == '2': #CHeck for errors
+            print(gradeErrors(CSV))
+        elif selection == '3': #Display the 2 Plots
+            gradePlot(computeFinalGrades(GradeMatrix),GradeMatrix)
+            CSV = pd.read_csv(FileName)
+            GradeMatrix = findGradeMatrix(FileName)
+        elif selection == '4': #Display All grades and the students final grades
+            print("List of grades:")
+            print(GradeMatrix)
+            print("The grades the students recieve:")
+            print(computeFinalGrades(GradeMatrix))
+        elif selection =='5': #End
+            print("Good bye!")
+            break
+        else:
+            print("---------------------------------------------------------------")
+            print("Unknown Option Selected! Please enter a menu number between 1 and 4 or exit on 5") 
+
+
+if(__name__=="__main__"):
+    main()
